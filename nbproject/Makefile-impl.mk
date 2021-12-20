@@ -24,7 +24,7 @@ CLEAN_SUBPROJECTS=${CLEAN_SUBPROJECTS_${SUBPROJECTS}}
 
 
 # Project Name
-PROJECTNAME=Bai10_KeyMatrix_LCD - Password Door
+PROJECTNAME=DoAnTKLL211
 
 # Active Configuration
 DEFAULTCONF=default

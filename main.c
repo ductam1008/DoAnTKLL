@@ -1,29 +1,33 @@
 #include "main.h"
-#include "string.h"
+#include <ctype.h>
+#include <string.h>
 // Noi khai bao hang so
 #define     LED     PORTD
 #define     ON      1
 #define     OFF     0
 
 #define     INIT_SYSTEM             0
-#define     ENTER_PASSWORD_USER     1
-#define     CHECK_PASSWORD_USER     2
+#define     ENTER_PASSWORD          1
+#define     CHECK_PASSWORD          2
 #define     UNLOCK_DOOR             3
 #define     WRONG_PASSWORD          4
-#define     OPTION_MODE             5
 #define     USER_MODE               6
 #define     ADMIN_MODE              7
 #define     USER_CHOOSE             8
 #define     ADMIN_CHOOSE            9
 #define     CHANGE_PASSWORD_USER    10
 #define     CHANGE_PASSWORD_ADMIN   11
-#define     ENTER_PASSWORD_ADMIN    12
-#define     CHECK_PASSWORD_ADMIN    13
-#define     APPLY_NEW_PASS_ADMIN    14
-#define     APPLY_NEW_PASS_USER     15
+#define     ENTER_STT               16
+#define     CHECK_STT               17
+#define     WRONG_STT               18
+#define     ACCEPT_NEW_PW           19
+#define     ADMIN_OPTIONS           20
+#define     MANAGE_MEMBER           21
+#define     ADMIN_ADD_MEMBER        22
+#define     ADMIN_REMOVE_MEMBER     23
 // Noi khai bao bien toan cuc
-unsigned char arrayMapOfOutput [8] = {0x01, 0x02, 0x04, 0x08, 0x10, 0x20, 0x40, 0x80};
-unsigned char statusOutput[8] = {0, 0, 0, 0, 0, 0, 0, 0};
+unsigned char arrayMapOfOutput[8] = { 0x01, 0x02, 0x04, 0x08, 0x10, 0x20, 0x40, 0x80 };
+unsigned char statusOutput[8] = { 0, 0, 0, 0, 0, 0, 0, 0 };
 // Khai bao cac ham co ban IO
 void init_system(void);
 void delay_ms(int value);
@@ -33,63 +37,48 @@ void TestOutput(void);
 void ReverseOutput(int index);
 void Test_KeyMatrix();
 //Chuong trinh Password Door
-#define PASSWORD_LENGTH 5
-#define MAX_ACCOUNT     5
-unsigned char arrayMapOfNumber [16] = {1, 2, 3, 'A', 4, 5, 6, 'B',
-    7, 8, 9, 'C', '*', 0, 'E', 'D'};
-unsigned char arrayMapOfPasswordU [5][4] = {
-    {1, 2, 3, 4},
-    {2, 7, 8, 9},
-    {3, 3, 3, 3},
-    {4, 8, 6, 8},
-    {5, 6, 7, 8},
-};
-unsigned char arrayMapOfPasswordA [5][5]= {
-    {1, 2, 3, 4, 'A'},
-    {2, 7, 8, 9, 'B'},
-    {3, 3, 3, 3, 'C'},
-    {4, 8, 6, 8, 'D'},
-    {5, 6, 7, 8, 'A'},
+#define PASSWORD_LENGTH 6
+#define MAX_ACCOUNT     10
+#define ERROR_VALID     0xffff
+#define MAX_STT_LENGTH  3
+unsigned char arrayMapOfNumber[16] = { 1, 2, 3, 'A', 4, 5, 6, 'B',
+    7, 8, 9, 'C', '*', 0, 'E', 'D' };
+unsigned char arrayMapOfPassword[5][PASSWORD_LENGTH] = {
+    {1, 2, 3, 4, 5, 6},
+    {1, 7, 8, 9, 9, 7},
+    {0, 3, 3, 3, 3, 8},
+    {0, 8, 6, 8, 6, 9},
+    {0, 6, 7, 8, 9, 0},
 };
 
-typedef struct user_account
-{
-    unsigned int ID_U;
-    unsigned char passwordU[4];
+typedef struct user_account{
+    unsigned int STT;
+    unsigned char password[PASSWORD_LENGTH];
 } user_account;
-user_account accountU[MAX_ACCOUNT]={
-    {0, {1, 2, 3, 4}},
-    {1, {2, 7, 8, 9}},
-    {2, {3, 3, 3, 3}},
-    {3, {4, 8, 6, 8}},
-    {4, {5, 6, 7, 8}}
+user_account account[MAX_ACCOUNT] = {
+    {0, {1, 2, 3, 4, 5, 6}},
+    {1, {1, 7, 8, 9, 9, 7}},
+    {2, {0, 3, 3, 3, 3, 8}},
+    {3, {0, 8, 6, 8, 6, 9}},
+    {4, {0, 6, 7, 8, 9, 0}}
 };
 
-typedef struct admin_account
-{
-    unsigned int ID_A;
-    unsigned char passwordA[5];
-} admin_account;
-admin_account accountA[MAX_ACCOUNT]={
-    {0, {1, 2, 3, 4, 'A'}},
-    {1, {2, 7, 8, 9, 'B'}},
-    {2, {3, 3, 3, 3, 'C'}},
-    {3, {4, 8, 6, 8, 'D'}},
-    {4, {5, 6, 7, 8, 'A'}}
-};
+unsigned char arrayPassword[PASSWORD_LENGTH];
+unsigned int STT_value = 0;
 
-unsigned char arrayPasswordU[4];
-unsigned char arrayPasswordA[5];
 unsigned char statusPassword = INIT_SYSTEM;
+
 unsigned char indexOfNumber = 0;
+unsigned char indexOfSTT =0;
 unsigned char timeDelay = 0;
 
-unsigned int current_user =0;
-unsigned int current_admin =0;
+unsigned int current_user = 0;
+unsigned int num_of_user = 5;
+unsigned int index_user = 5;
 
 void App_PasswordDoor();
-unsigned char CheckPasswordUser();
-unsigned char CheckPasswordAdmin();
+unsigned char CheckPassword();
+unsigned char isModeOn();
 unsigned char isButtonNumber();
 unsigned char numberValue;
 unsigned char isButtonEnter();
@@ -166,7 +155,8 @@ void ReverseOutput(int index) {
     if (statusOutput[index] == ON) {
         CloseOutput(index);
         statusOutput[index] = OFF;
-    } else {
+    }
+    else {
         OpenOutput(index);
         statusOutput[index] = ON;
     }
@@ -182,6 +172,8 @@ void TestOutput(void) {
     }
 }
 
+
+/*
 unsigned char isButtonMotorOn() {
     if (key_code[2] == 1)
         return 1;
@@ -195,198 +187,302 @@ unsigned char isButtonMotorOff() {
     else
         return 0;
 }
+*/
 
+//Check STT account
+unsigned int CheckSTT (unsigned int stt) {
+    int i = 0;
+    for ( i = 0; i < num_of_user; i++) {
+        if (account[i].STT == stt) return i;
+    }
+    return ERROR_VALID;
+}
 void App_PasswordDoor() {
     switch (statusPassword) {
-        case INIT_SYSTEM:
-            LcdPrintStringS(0, 0, "HELLO !!!");
-            LcdPrintStringS(1, 0, "PRESS # TO NEXT");
-            LockDoor();
-            if (isButtonEnter()) {
-                indexOfNumber = 0;
-                timeDelay = 0;
-                statusPassword = OPTION_MODE;
-                LcdClearS();
-            }
-            break;
-        case OPTION_MODE:
-            LcdPrintStringS(0, 0, "1: USER MODE");
-            LcdPrintStringS(1, 0, "2: ADMIN MODE");
-            timeDelay++;            
-            if (isButtonPressOne()) {
-                indexOfNumber++;
-                timeDelay = 0;
-                statusPassword = ENTER_PASSWORD_USER;
-                LcdClearS();
-            }
-            if (isButtonPressTwo()) {
-                indexOfNumber = 0;
-                timeDelay = 0;
-                statusPassword = ENTER_PASSWORD_ADMIN;
-                LcdClearS();
-            }
-            if (timeDelay>=100)
-                statusPassword=INIT_SYSTEM;
-            break;            
-        case ENTER_PASSWORD_USER:
-            LcdPrintStringS(0, 0, "1:ENTER PW USER:");
-            timeDelay++;
-            if (isButtonNumber())
-            {
-                LcdPrintStringS(1, indexOfNumber, "*");
-                arrayPasswordU[indexOfNumber] = numberValue;
-                indexOfNumber++;
-                timeDelay = 0;
-            }
-            if (indexOfNumber >= 4)            
-                statusPassword = CHECK_PASSWORD_USER;
-            if (timeDelay >= 100)
-                statusPassword = INIT_SYSTEM;
-            if (isButtonEnter())
-                statusPassword = INIT_SYSTEM;
-            break;
-        case ENTER_PASSWORD_ADMIN:
-             LcdPrintStringS(0, 0, "1: ENTER PW ADMIN:    ");
-             timeDelay++;
-             if (isButtonNumber())
-            {
-                LcdPrintStringS(1, indexOfNumber, "*");
-                arrayPasswordA[indexOfNumber] = numberValue;
-                indexOfNumber++;
-                timeDelay = 0;
-            }
-             if (indexOfNumber >= 5)
-                statusPassword = CHECK_PASSWORD_ADMIN;
-            if (timeDelay >= 100)
-                statusPassword = INIT_SYSTEM;
-            if (isButtonEnter())
-                statusPassword = INIT_SYSTEM;
-             break;
-            
-        case USER_MODE:
-            LcdPrintStringS(0, 0, "1: CHANGE PW     ");
-            LcdPrintStringS(1, 0, "2: OPEN DOOR     ");
-            if(isButtonPressOne()){
-                indexOfNumber++;
-                timeDelay = 0;
-                statusPassword = CHANGE_PASSWORD_USER;
-                LcdClearS();
-            }
-            if(isButtonPressTwo()){
-                indexOfNumber++;
-                timeDelay = 0;
-                statusPassword = UNLOCK_DOOR;
-                LcdClearS();
-            }
-            break;
-        case CHECK_PASSWORD_USER:
+    case INIT_SYSTEM:
+        LcdPrintStringS(0, 0, "PRESS # FOR PW");
+        LcdPrintStringS(1, 0, "");
+        LockDoor();
+        if (isButtonEnter()) {
+            indexOfNumber = 0;
             timeDelay = 0;
-            if (CheckPasswordUser())
+            STT_value = 0;
+            statusPassword = ENTER_STT;
+            LcdClearS();
+        }
+        break;
+    case ENTER_STT:
+        timeDelay++;
+        LcdPrintStringS(0, 0, "ENTER STT:");
+        if (isButtonNumber()) {
+            if (numberValue == 'D') {
+                if (indexOfSTT>0) {
+                    STT_value = STT_value / 10;
+                    indexOfSTT --;
+                }
+            }
+            else if (numberValue <10) {
+                STT_value = STT_value * 10 + numberValue;
+                indexOfSTT++;
+            }
+            timeDelay = 0;
+        }
+        if (indexOfSTT >= MAX_STT_LENGTH || isButtonEnter()) {
+            reset_data();
+            statusPassword = CHECK_STT;
+        }
+        if (isButtonBack()) {
+            statusPassword = INIT_SYSTEM;
+        }
+        if (timeDelay >= 600) {
+            statusPassword = INIT_SYSTEM;
+        }
+        break;
+    case CHECK_STT:
+        timeDelay=0;
+        current_user = CheckSTT(STT_value);
+        if (current_user != ERROR_VALID) {
+            statusPassword = ENTER_PASSWORD;
+            LcdClearS();
+        }
+        else {
+            statusPassword = WRONG_STT;
+        }
+        break;
+    case WRONG_STT:
+        timeDelay++;
+        LcdPrintStringS(0,0,"WRONG STT");
+        if (timeDelay>= 60) {
+            statusPassword = INIT_SYSTEM;
+        }
+        break;
+    case ENTER_PASSWORD:
+        LcdPrintStringS(0, 0, "ENTER PW");
+        LcdPrintNumS(0, 13, account[current_user].STT);
+        timeDelay++;
+        if(isButtonNumber()) {
+            if (numberValue == 'D') {
+                if (indexOfNumber > 0) {
+                    indexOfNumber--;
+                    LcdPrintStringS(1, indexOfNumber, " ");
+                }
+            }
+            else if(numberValue < 10){
+                LcdPrintStringS(1, indexOfNumber, "*");
+                arrayPassword[indexOfNumber] = numberValue;
+                indexOfNumber++;
+            }
+            timeDelay = 0;
+        }
+        if (indexOfNumber >= PASSWORD_LENGTH){
+            statusPassword = CHECK_PASSWORD;
+        }
+        if (timeDelay >=600) {
+            statusPassword = INIT_SYSTEM;
+        }
+        if (isButtonBack()) {
+            statusPassword = INIT_SYSTEM;
+        }
+        break;
+    case CHECK_PASSWORD:
+        timeDelay = 0;
+        if (CheckPassword()) {
+            /*
+            if (account[current_user].password[0] == '0') {
                 statusPassword = USER_MODE;
-            else
-                statusPassword = WRONG_PASSWORD;
-            break;
-        case CHANGE_PASSWORD_USER:
-            break;
-        case ADMIN_MODE:
-            LcdPrintStringS(0, 0, "1: CHANGE PW     ");
-            LcdPrintStringS(1, 0, "2: OPEN DOOR    ");
-            if(isButtonPressOne()){
-                indexOfNumber++;
-                timeDelay = 0;
-                statusPassword = CHANGE_PASSWORD_ADMIN;
-                LcdClearS();
             }
-            if(isButtonPressTwo()){
-                indexOfNumber++;
-                timeDelay = 0;
-                statusPassword = UNLOCK_DOOR;
-                LcdClearS();
+            else {
+                if(account[current_user].password[0] == '1') {
+                    statusPassword = ADMIN_MODE;
+                }
             }
-            break;
-        case CHECK_PASSWORD_ADMIN:
+            */
+            //isModeOn();
+            statusPassword = ADMIN_MODE;       
+        }
+        
+        else {
+            statusPassword = WRONG_PASSWORD;
+        }
+        break;   
+    case USER_MODE:
+        timeDelay++;
+        LcdPrintStringS(0, 0, "1.OPEN DOOR");
+        LcdPrintStringS(1, 0, "2.CHANGE PW");
+        if (isButtonBack()) {
+            statusPassword=INIT_SYSTEM;
+        } 
+        if (isButtonPressOne()){
+            statusPassword = UNLOCK_DOOR;
+            reset_data();
+        }
+        if (isButtonPressTwo()) {
+            statusPassword = CHANGE_PASSWORD_USER;
+            reset_data();
+        }
+        break;
+    
+    case CHANGE_PASSWORD_USER:
+        timeDelay++;
+        LcdPrintStringS(0, 0, "CHANGE USER PW");
+        if (isButtonNumber()) {
+            if (numberValue == 'D') {
+                if (indexOfNumber > 0) {
+                    indexOfNumber--;
+                    LcdPrintStringS(1, indexOfNumber, " ");
+                }
+            }
+            else if (numberValue < 10) {
+                if (indexOfNumber < PASSWORD_LENGTH) {
+                    LcdPrintStringS(1, indexOfNumber, "*");
+                    arrayPassword[indexOfNumber] = numberValue;
+                    indexOfNumber++;
+                }
+            }
             timeDelay = 0;
-            if (CheckPasswordAdmin())
-                statusPassword = ADMIN_MODE;
-            else
-                statusPassword = WRONG_PASSWORD;
-            break;
-        case CHANGE_PASSWORD_ADMIN:
-            timeDelay++;
-            LcdPrintStringS(0, 0, "ENTER NEW PW");
-            if(isButtonNumber()) {
-                if (numberValue == '*') {
-                    if (indexOfNumber > 0) {
-                        indexOfNumber--;
-                        LcdPrintStringS(1, indexOfNumber, " ");
-                    }
+        }
+        if (isButtonEnter() && indexOfNumber >= PASSWORD_LENGTH) {
+            statusPassword = ACCEPT_NEW_PW;
+            reset_data();
+        }   
+        if (isButtonBack()) {
+            statusPassword = USER_MODE;
+            reset_data();
+        }
+        if(timeDelay>600) {
+            statusPassword = INIT_SYSTEM;
+        }
+        break;
+    case ADMIN_MODE:
+        timeDelay++;
+        LcdPrintStringS(0, 0, "1.OPEN DOOR");
+        LcdPrintStringS(1, 0, "2.OPTIONS");
+        if (isButtonBack()) {
+            statusPassword=INIT_SYSTEM;
+        } 
+        if (isButtonPressOne()){
+            statusPassword = UNLOCK_DOOR;
+            reset_data();
+        }
+        if (isButtonPressTwo()) {
+            statusPassword = ADMIN_OPTIONS;
+            reset_data();
+        }
+        break;
+    case ADMIN_OPTIONS:
+        timeDelay++;
+        LcdPrintStringS(0, 0, "1.CHANGE PW");
+        LcdPrintStringS(1, 0, "2.MANAGE MEM");
+        if (isButtonBack()) {
+            statusPassword = ADMIN_MODE;
+        } 
+        if (isButtonPressOne()){
+            statusPassword = CHANGE_PASSWORD_ADMIN;
+            reset_data();
+        }
+        if (isButtonPressTwo()) {
+            statusPassword = MANAGE_MEMBER;
+            reset_data();
+        }
+        break;
+    case MANAGE_MEMBER:
+        timeDelay++;
+        LcdPrintStringS(0, 0, "1.ADD MEM");
+        LcdPrintStringS(1, 0, "2.DELETE MEM");
+        if (isButtonBack()) {
+            statusPassword = ADMIN_MODE;
+        } 
+        if (isButtonPressOne()){
+            statusPassword = ADMIN_ADD_MEMBER;
+            reset_data();
+        }
+        if (isButtonPressTwo()) {
+            statusPassword = ADMIN_REMOVE_MEMBER;
+            reset_data();
+        }
+         break;          
+    case CHANGE_PASSWORD_ADMIN:
+        timeDelay++;
+        LcdPrintStringS(0, 0, "CHANGE AD PW");
+        if (isButtonNumber()) {
+            if (numberValue == 'D') {
+                if (indexOfNumber > 0) {
+                    indexOfNumber--;
+                    LcdPrintStringS(1, indexOfNumber, " ");
                 }
-                else if (numberValue < 10) {
-                    if (indexOfNumber < 5) {
-                        LcdPrintStringS(1, indexOfNumber, "*");
-                        arrayPasswordA[indexOfNumber] = numberValue;
-                        indexOfNumber++;
-                    }
+            }
+            else if (numberValue < 10) {
+                if (indexOfNumber < PASSWORD_LENGTH) {
+                    LcdPrintStringS(1, indexOfNumber, "*");
+                    arrayPassword[indexOfNumber] = numberValue;
+                    indexOfNumber++;
                 }
-                timeDelay =0;
             }
-            if (isButtonEnter() && indexOfNumber >= 5){
-                statusPassword = APPLY_NEW_PASS_ADMIN;
-                reset_data();
-            }
-            if (timeDelay >= 100)
-                statusPassword = INIT_SYSTEM;
-            break;
-        case APPLY_NEW_PASS_ADMIN:
-            timeDelay++;
-            LcdPrintStringS(0, 0, "CHANGE SUCCESS");
-            if(timeDelay==1) {
-                memmove(accountA[current_admin].passwordA, arrayPasswordA, sizeof(arrayPasswordA));
-            }
-            if (timeDelay >40) {
-                statusPassword = INIT_SYSTEM;
-            }
-            break;
-        case UNLOCK_DOOR:
-            timeDelay++;
-            LcdPrintStringS(0, 0, "OPENING DOOR    ");
-            UnlockDoor();
-            if (timeDelay >= 100)
-                statusPassword = INIT_SYSTEM;
-            break;
-        case WRONG_PASSWORD:
-            timeDelay++;
-            LcdPrintStringS(0, 0, "PASSWORD WRONG  ");
-            if (timeDelay >= 40)
-                statusPassword = INIT_SYSTEM;
-            break;
-        default:
-            break;
+            timeDelay = 0;
+        }
+        if (isButtonEnter() && indexOfNumber >= PASSWORD_LENGTH) {
+            statusPassword = ACCEPT_NEW_PW;
+            reset_data();
+        }   
+        if (isButtonBack()) {
+            statusPassword = ADMIN_MODE;
+            reset_data();
+        }
+        if(timeDelay>600) {
+            statusPassword = INIT_SYSTEM;
+        }
+        break;
+    case ACCEPT_NEW_PW:
+        timeDelay++;
+        LcdPrintStringS(0,0, "CHANGE SUCCESS");
+        if (timeDelay == 1) {
+            memmove(account[current_user].password, arrayPassword, sizeof(arrayPassword));
+        }
+        if (timeDelay > 40) {
+            statusPassword = INIT_SYSTEM;
+        }
+        break;
+    case ADMIN_ADD_MEMBER:
+        break;
+    case ADMIN_REMOVE_MEMBER:
+        break;
+    case UNLOCK_DOOR:
+        timeDelay++;
+        LcdPrintStringS(0, 0, "OPENING DOOR    ");
+        UnlockDoor();
+        if (timeDelay >= 100)
+            statusPassword = INIT_SYSTEM;
+        break;
+    case WRONG_PASSWORD:
+        timeDelay++;
+        LcdPrintStringS(0, 0, "PASSWORD WRONG  ");
+        if (timeDelay >= 40)
+            statusPassword = INIT_SYSTEM;
+        break;
+    default:
+        break;
     }
 }
 
-unsigned char CheckPasswordUser()
+unsigned char CheckPassword()
 {
-     unsigned char i,j;
-    for (i=0; i<4;i++) {
-        if (accountU[current_user].passwordU[i] != arrayPasswordU[i]) {
+    unsigned char i, j;
+    for (i = 0; i < 6; i++) {
+        if (account[current_user].password[i] != arrayPassword[i]) {
             return 0;
         }
     }
     return 1;
 
 }
-unsigned char CheckPasswordAdmin()
-{
-    unsigned char i,j;
-    for (i=0; i<5;i++) {
-        if (accountA[current_admin].passwordA[i] != arrayPasswordA[i]) {
-            return 0;
-        }
-    }
-    return 1;
-
+/*
+//check PW to state ADMIN_OPTION
+unsigned char isModeOn() {
+    if (account[current_user].password[0]==0) statusPassword = ADMIN_MODE;
+    if (account[current_user].password[0]==0) statusPassword = USER_MODE;
 }
+*/
+
 
 unsigned char isButtonNumber() {
     unsigned char i;
@@ -429,10 +525,12 @@ unsigned char isButtonEnter() {
         return 0;
 }
 
+
 void reset_data() {
     LcdClearS();
     timeDelay = 0;
-    indexOfNumber =0;
+    indexOfNumber = 0;
+    indexOfSTT = 0;
 }
 
 void UnlockDoor() {

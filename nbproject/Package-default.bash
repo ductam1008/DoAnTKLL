@@ -10,9 +10,9 @@ CND_CONF=default
 CND_DISTDIR=dist
 TMPDIR=build/${CND_CONF}/${IMAGE_TYPE}/tmp-packaging
 TMPDIRNAME=tmp-packaging
-OUTPUT_PATH=dist/${CND_CONF}/${IMAGE_TYPE}/Bai10_KeyMatrix_LCD_-_Password_Door.${IMAGE_TYPE}.${OUTPUT_SUFFIX}
-OUTPUT_BASENAME=Bai10_KeyMatrix_LCD_-_Password_Door.${IMAGE_TYPE}.${OUTPUT_SUFFIX}
-PACKAGE_TOP_DIR=bai10keymatrixlcd-passworddoor/
+OUTPUT_PATH=dist/${CND_CONF}/${IMAGE_TYPE}/DoAnTKLL211.${IMAGE_TYPE}.${OUTPUT_SUFFIX}
+OUTPUT_BASENAME=DoAnTKLL211.${IMAGE_TYPE}.${OUTPUT_SUFFIX}
+PACKAGE_TOP_DIR=doantkll211/
 
 # Functions
 function checkReturnCode
@@ -57,15 +57,15 @@ mkdir -p ${TMPDIR}
 
 # Copy files and create directories and links
 cd "${TOP}"
-makeDirectory ${TMPDIR}/bai10keymatrixlcd-passworddoor/bin
+makeDirectory ${TMPDIR}/doantkll211/bin
 copyFileToTmpDir "${OUTPUT_PATH}" "${TMPDIR}/${PACKAGE_TOP_DIR}bin/${OUTPUT_BASENAME}" 0755
 
 
 # Generate tar file
 cd "${TOP}"
-rm -f ${CND_DISTDIR}/${CND_CONF}/package/bai10keymatrixlcd-passworddoor.tar
+rm -f ${CND_DISTDIR}/${CND_CONF}/package/doantkll211.tar
 cd ${TMPDIR}
-tar -vcf ../../../../${CND_DISTDIR}/${CND_CONF}/package/bai10keymatrixlcd-passworddoor.tar *
+tar -vcf ../../../../${CND_DISTDIR}/${CND_CONF}/package/doantkll211.tar *
 checkReturnCode
 
 # Cleanup
