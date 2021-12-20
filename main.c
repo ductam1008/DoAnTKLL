@@ -51,6 +51,9 @@ unsigned char arrayMapOfPassword[5][PASSWORD_LENGTH] = {
     {0, 6, 7, 8, 9, 0},
 };
 
+//char*str1="OK1";
+//char str2[] = "OK2";
+
 typedef struct user_account{
     unsigned int STT;
     unsigned char password[PASSWORD_LENGTH];
@@ -109,6 +112,7 @@ void main(void) {
         flag_timer3 = 0;
         // thuc hien cac cong viec duoi day
         scan_key_matrix();
+        //Test_KeyMatrix();
         App_PasswordDoor();
         DisplayLcdScreen();
     }
@@ -287,18 +291,19 @@ void App_PasswordDoor() {
     case CHECK_PASSWORD:
         timeDelay = 0;
         if (CheckPassword()) {
-            /*
-            if (account[current_user].password[0] == '0') {
+            
+            if (account[current_user].password[0] == 0) {
                 statusPassword = USER_MODE;
             }
             else {
-                if(account[current_user].password[0] == '1') {
+                if(account[current_user].password[0] == 1) {
                     statusPassword = ADMIN_MODE;
                 }
+                //statusPassword = ADMIN_MODE; 
             }
-            */
+            
             //isModeOn();
-            statusPassword = ADMIN_MODE;       
+            //statusPassword = ADMIN_MODE;       
         }
         
         else {
@@ -541,4 +546,15 @@ void UnlockDoor() {
 void LockDoor() {
     CloseOutput(0);
     //CloseOutput(4);
+}
+void Test_KeyMatrix() {
+    int i =0;
+    for(i=0; i<16; i++) {
+        if (key_code[i]>0) {
+            LcdPrintNumS(0, i, key_code[i]);
+        }
+        else {
+            LcdPrintNumS(0,i,0);
+        }
+    }
 }
