@@ -57,13 +57,14 @@ unsigned char arrayMapOfPassword[5][PASSWORD_LENGTH] = {
 typedef struct user_account{
     unsigned int STT;
     unsigned char password[PASSWORD_LENGTH];
+    char* name;
 } user_account;
 user_account account[MAX_ACCOUNT] = {
-    {0, {1, 2, 3, 4, 5, 6}},
-    {1, {1, 7, 8, 9, 9, 7}},
-    {2, {0, 3, 3, 3, 3, 8}},
-    {3, {0, 8, 6, 8, 6, 9}},
-    {4, {0, 6, 7, 8, 9, 0}}
+    {0, {1, 2, 3, 4, 5, 6}, "TAM"},
+    {1, {1, 7, 8, 9, 9, 7}, "NGH"},
+    {2, {0, 3, 3, 3, 3, 8}, "TA1"},
+    {3, {0, 8, 6, 8, 6, 9}, "TA2"},
+    {4, {0, 6, 7, 8, 9, 0}, "TA3"}
 };
 
 unsigned char arrayPassword[PASSWORD_LENGTH];
@@ -262,7 +263,9 @@ void App_PasswordDoor() {
         break;
     case ENTER_PASSWORD:
         LcdPrintStringS(0, 0, "ENTER PW");
-        LcdPrintNumS(0, 13, account[current_user].STT);
+        LcdPrintNumS(0,11,account[current_user].STT);
+        LcdPrintStringS(0, 12, ":");
+        LcdPrintStringS(0, 13, account[current_user].name);
         timeDelay++;
         if(isButtonNumber()) {
             if (numberValue == 'D') {
@@ -294,18 +297,15 @@ void App_PasswordDoor() {
             
             if (account[current_user].password[0] == 0) {
                 statusPassword = USER_MODE;
+                LcdClearS();
             }
             else {
                 if(account[current_user].password[0] == 1) {
                     statusPassword = ADMIN_MODE;
+                    LcdClearS();
                 }
-                //statusPassword = ADMIN_MODE; 
-            }
-            
-            //isModeOn();
-            //statusPassword = ADMIN_MODE;       
+            }     
         }
-        
         else {
             statusPassword = WRONG_PASSWORD;
         }

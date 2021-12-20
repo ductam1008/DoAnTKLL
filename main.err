@@ -1,27 +1,36 @@
-Warning[2058] D:\Studying\HK211\CO3091_DoAnTKLL\DoAnTKLL211\main.c 114 : call of function without prototype
-Warning[2058] D:\Studying\HK211\CO3091_DoAnTKLL\DoAnTKLL211\main.c 116 : call of function without prototype
+Warning[2066] D:\Studying\HK211\CO3091_DoAnTKLL\DoAnTKLL211\main.c 67 : type qualifier mismatch in assignment
+Warning[2066] D:\Studying\HK211\CO3091_DoAnTKLL\DoAnTKLL211\main.c 67 : type qualifier mismatch in assignment
+Warning[2066] D:\Studying\HK211\CO3091_DoAnTKLL\DoAnTKLL211\main.c 67 : type qualifier mismatch in assignment
+Warning[2066] D:\Studying\HK211\CO3091_DoAnTKLL\DoAnTKLL211\main.c 67 : type qualifier mismatch in assignment
+Warning[2066] D:\Studying\HK211\CO3091_DoAnTKLL\DoAnTKLL211\main.c 67 : type qualifier mismatch in assignment
+Warning[2058] D:\Studying\HK211\CO3091_DoAnTKLL\DoAnTKLL211\main.c 115 : call of function without prototype
 Warning[2058] D:\Studying\HK211\CO3091_DoAnTKLL\DoAnTKLL211\main.c 117 : call of function without prototype
-Warning[2058] D:\Studying\HK211\CO3091_DoAnTKLL\DoAnTKLL211\main.c 131 : call of function without prototype
+Warning[2058] D:\Studying\HK211\CO3091_DoAnTKLL\DoAnTKLL211\main.c 118 : call of function without prototype
 Warning[2058] D:\Studying\HK211\CO3091_DoAnTKLL\DoAnTKLL211\main.c 132 : call of function without prototype
-Warning[2058] D:\Studying\HK211\CO3091_DoAnTKLL\DoAnTKLL211\main.c 142 : call of function without prototype
-Warning[2054] D:\Studying\HK211\CO3091_DoAnTKLL\DoAnTKLL211\main.c 207 : suspicious pointer conversion
+Warning[2058] D:\Studying\HK211\CO3091_DoAnTKLL\DoAnTKLL211\main.c 133 : call of function without prototype
+Warning[2058] D:\Studying\HK211\CO3091_DoAnTKLL\DoAnTKLL211\main.c 143 : call of function without prototype
 Warning[2054] D:\Studying\HK211\CO3091_DoAnTKLL\DoAnTKLL211\main.c 208 : suspicious pointer conversion
-Warning[2058] D:\Studying\HK211\CO3091_DoAnTKLL\DoAnTKLL211\main.c 209 : call of function without prototype
+Warning[2054] D:\Studying\HK211\CO3091_DoAnTKLL\DoAnTKLL211\main.c 209 : suspicious pointer conversion
 Warning[2058] D:\Studying\HK211\CO3091_DoAnTKLL\DoAnTKLL211\main.c 210 : call of function without prototype
-Warning[2058] D:\Studying\HK211\CO3091_DoAnTKLL\DoAnTKLL211\main.c 215 : call of function without prototype
-Warning[2054] D:\Studying\HK211\CO3091_DoAnTKLL\DoAnTKLL211\main.c 220 : suspicious pointer conversion
-Warning[2058] D:\Studying\HK211\CO3091_DoAnTKLL\DoAnTKLL211\main.c 221 : call of function without prototype
-Warning[2058] D:\Studying\HK211\CO3091_DoAnTKLL\DoAnTKLL211\main.c 234 : call of function without prototype
+Warning[2058] D:\Studying\HK211\CO3091_DoAnTKLL\DoAnTKLL211\main.c 211 : call of function without prototype
+Warning[2058] D:\Studying\HK211\CO3091_DoAnTKLL\DoAnTKLL211\main.c 216 : call of function without prototype
+Warning[2054] D:\Studying\HK211\CO3091_DoAnTKLL\DoAnTKLL211\main.c 221 : suspicious pointer conversion
+Warning[2058] D:\Studying\HK211\CO3091_DoAnTKLL\DoAnTKLL211\main.c 222 : call of function without prototype
 Warning[2058] D:\Studying\HK211\CO3091_DoAnTKLL\DoAnTKLL211\main.c 235 : call of function without prototype
-Warning[2058] D:\Studying\HK211\CO3091_DoAnTKLL\DoAnTKLL211\main.c 238 : call of function without prototype
-Warning[2058] D:\Studying\HK211\CO3091_DoAnTKLL\DoAnTKLL211\main.c 250 : call of function without prototype
-Warning[2054] D:\Studying\HK211\CO3091_DoAnTKLL\DoAnTKLL211\main.c 258 : suspicious pointer conversion
-Warning[2054] D:\Studying\HK211\CO3091_DoAnTKLL\DoAnTKLL211\main.c 264 : suspicious pointer conversion
-Warning[2058] D:\Studying\HK211\CO3091_DoAnTKLL\DoAnTKLL211\main.c 267 : call of function without prototype
-Warning[2054] D:\Studying\HK211\CO3091_DoAnTKLL\DoAnTKLL211\main.c 271 : suspicious pointer conversion
-Warning[2054] D:\Studying\HK211\CO3091_DoAnTKLL\DoAnTKLL211\main.c 275 : suspicious pointer conversion
-Warning[2058] D:\Studying\HK211\CO3091_DoAnTKLL\DoAnTKLL211\main.c 287 : call of function without prototype
-Warning[2058] D:\Studying\HK211\CO3091_DoAnTKLL\DoAnTKLL211\main.c 293 : call of function without prototype
+Warning[2058] D:\Studying\HK211\CO3091_DoAnTKLL\DoAnTKLL211\main.c 236 : call of function without prototype
+Warning[2058] D:\Studying\HK211\CO3091_DoAnTKLL\DoAnTKLL211\main.c 239 : call of function without prototype
+Warning[2058] D:\Studying\HK211\CO3091_DoAnTKLL\DoAnTKLL211\main.c 251 : call of function without prototype
+Warning[2054] D:\Studying\HK211\CO3091_DoAnTKLL\DoAnTKLL211\main.c 259 : suspicious pointer conversion
+Warning[2054] D:\Studying\HK211\CO3091_DoAnTKLL\DoAnTKLL211\main.c 265 : suspicious pointer conversion
+Warning[2054] D:\Studying\HK211\CO3091_DoAnTKLL\DoAnTKLL211\main.c 267 : suspicious pointer conversion
+Warning[2054] D:\Studying\HK211\CO3091_DoAnTKLL\DoAnTKLL211\main.c 268 : suspicious pointer conversion
+Warning[2058] D:\Studying\HK211\CO3091_DoAnTKLL\DoAnTKLL211\main.c 270 : call of function without prototype
+Warning[2054] D:\Studying\HK211\CO3091_DoAnTKLL\DoAnTKLL211\main.c 274 : suspicious pointer conversion
+Warning[2054] D:\Studying\HK211\CO3091_DoAnTKLL\DoAnTKLL211\main.c 278 : suspicious pointer conversion
+Warning[2058] D:\Studying\HK211\CO3091_DoAnTKLL\DoAnTKLL211\main.c 290 : call of function without prototype
+Warning[2058] D:\Studying\HK211\CO3091_DoAnTKLL\DoAnTKLL211\main.c 296 : call of function without prototype
+Warning[2058] D:\Studying\HK211\CO3091_DoAnTKLL\DoAnTKLL211\main.c 300 : call of function without prototype
+Warning[2058] D:\Studying\HK211\CO3091_DoAnTKLL\DoAnTKLL211\main.c 305 : call of function without prototype
 Warning[2054] D:\Studying\HK211\CO3091_DoAnTKLL\DoAnTKLL211\main.c 315 : suspicious pointer conversion
 Warning[2054] D:\Studying\HK211\CO3091_DoAnTKLL\DoAnTKLL211\main.c 316 : suspicious pointer conversion
 Warning[2058] D:\Studying\HK211\CO3091_DoAnTKLL\DoAnTKLL211\main.c 317 : call of function without prototype
