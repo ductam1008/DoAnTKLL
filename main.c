@@ -13,19 +13,20 @@
 #define     WRONG_PASSWORD          4
 #define     USER_MODE               6
 #define     ADMIN_MODE              7
-#define     USER_CHOOSE             8
-#define     ADMIN_CHOOSE            9
 #define     CHANGE_PASSWORD_USER    10
 #define     CHANGE_PASSWORD_ADMIN   11
 #define     ENTER_STT               16
 #define     CHECK_STT               17
 #define     WRONG_STT               18
-#define     ACCEPT_NEW_PW           19
+#define     ACCEPT_NEW_PW_USER      19
+#define     ACCEPT_NEW_PW_ADMIN     12
 #define     ADMIN_OPTIONS           20
 #define     MANAGE_MEMBER           21
 #define     ADMIN_ADD_MEMBER        22
 #define     ADMIN_REMOVE_MEMBER     23
-#define     CREATE_NEW_MEMBER        24
+#define     CREATE_NEW_MEMBER       24
+#define     NEW_PW_ADMIN_INVALID    25
+#define     NEW_PW_USER_INVALID     26
 // Noi khai bao bien toan cuc
 unsigned char arrayMapOfOutput[8] = { 0x01, 0x02, 0x04, 0x08, 0x10, 0x20, 0x40, 0x80 };
 unsigned char statusOutput[8] = { 0, 0, 0, 0, 0, 0, 0, 0 };
@@ -58,14 +59,14 @@ unsigned char arrayMapOfPassword[5][PASSWORD_LENGTH] = {
 typedef struct user_account{
     unsigned int STT;
     unsigned char password[PASSWORD_LENGTH];
-    unsigned birthday;
+    char* name;
 } user_account;
 user_account account[MAX_ACCOUNT] = {
-    {0, {1, 2, 3, 4, 5, 6}, 1008},
-    {1, {1, 7, 8, 9, 9, 7}, 1009},
-    {2, {0, 3, 3, 3, 3, 8}, 1010},
-    {3, {0, 8, 6, 8, 6, 9}, 1103},
-    {4, {0, 6, 7, 8, 9, 0}, 0403}
+    {0, {1, 2, 3, 4, 5, 6}, "TAM"},
+    {1, {1, 7, 8, 9, 9, 7}, "TA1"},
+    {2, {0, 3, 3, 3, 3, 8}, "TA2"},
+    {3, {0, 8, 6, 8, 6, 9}, "TA3"},
+    {4, {0, 6, 7, 8, 9, 0}, "TA4"}
 };
 
 unsigned char arrayPassword[PASSWORD_LENGTH];
@@ -271,7 +272,7 @@ void App_PasswordDoor() {
         LcdPrintStringS(0, 0, "ENTER PW");
         LcdPrintNumS(0,10,account[current_user].STT);
         LcdPrintStringS(0, 11, ":");
-        LcdPrintNumS(0, 12, account[current_user].birthday);
+        LcdPrintStringS(0, 12, account[current_user].name);
         timeDelay++;
         if(isButtonNumber()) {
             if (numberValue == 'D') {
@@ -356,7 +357,7 @@ void App_PasswordDoor() {
             timeDelay = 0;
         }
         if (isButtonEnter() && indexOfNumber >= PASSWORD_LENGTH) {
-            statusPassword = ACCEPT_NEW_PW;
+            statusPassword = ACCEPT_NEW_PW_USER;
             reset_data();
         }   
         if (isButtonBack()) {
@@ -365,6 +366,36 @@ void App_PasswordDoor() {
         }
         if(timeDelay>600) {
             statusPassword = INIT_SYSTEM;
+        }
+        break;
+    case ACCEPT_NEW_PW_USER:
+        timeDelay++;
+        LcdPrintStringS(0,0, "CHANGE SUCCESS");
+        if (timeDelay==1) {
+            memmove(account[current_user].password, arrayPassword, sizeof(arrayPassword));            
+        }
+        if (isButtonEnter()) {
+            if(account[current_user].password[0]!=0) {
+                statusPassword=NEW_PW_USER_INVALID;
+                reset_data();
+            }
+            else {
+            statusPassword = INIT_SYSTEM;
+            reset_data();
+            }
+        }
+        break;
+    case NEW_PW_USER_INVALID:
+        timeDelay++;
+        LcdPrintStringS(0,0, "NEW PW INVALID");
+        LcdPrintStringS(1,0, "1ST NUM IS ERROR");
+        if (isButtonEnter()) {            
+            statusPassword = USER_MODE;
+            reset_data();            
+        }
+        if (timeDelay > 600) {
+            statusPassword = USER_MODE;
+            reset_data();
         }
         break;
     case ADMIN_MODE:
@@ -435,8 +466,8 @@ void App_PasswordDoor() {
             timeDelay = 0;
         }
         if (isButtonEnter() && indexOfNumber >= PASSWORD_LENGTH) {
-            statusPassword = ACCEPT_NEW_PW;
-            reset_data();
+                statusPassword = ACCEPT_NEW_PW_ADMIN;
+                reset_data();
         }   
         if (isButtonBack()) {
             statusPassword = ADMIN_MODE;
@@ -446,16 +477,36 @@ void App_PasswordDoor() {
             statusPassword = INIT_SYSTEM;
         }
         break;
-    case ACCEPT_NEW_PW:
+    case ACCEPT_NEW_PW_ADMIN:
         timeDelay++;
         LcdPrintStringS(0,0, "CHANGE SUCCESS");
-        if (timeDelay == 1) {
-            memmove(account[current_user].password, arrayPassword, sizeof(arrayPassword));
+        if (timeDelay==1) {
+            memmove(account[current_user].password, arrayPassword, sizeof(arrayPassword));            
         }
-        if (timeDelay > 40) {
+        if (isButtonEnter()) {
+            if(account[current_user].password[0]!=1) {
+                statusPassword=NEW_PW_ADMIN_INVALID;
+                reset_data();
+            }
+            else {
             statusPassword = INIT_SYSTEM;
+            reset_data();
+            }
         }
         break;
+    case NEW_PW_ADMIN_INVALID:
+        timeDelay++;
+        LcdPrintStringS(0,0, "NEW PW INVALID");
+        LcdPrintStringS(1,0, "1ST NUM IS ERROR");
+        if (isButtonEnter()) {            
+            statusPassword = ADMIN_OPTIONS;
+            reset_data();            
+        }
+        if (timeDelay > 600) {
+            statusPassword = ADMIN_OPTIONS;
+            reset_data();
+        }
+        break;  
     case ADMIN_ADD_MEMBER:
         timeDelay++;
         LcdPrintStringS(0, 0, "PW FOR MEMBER");
@@ -515,6 +566,7 @@ void App_PasswordDoor() {
         }
         break;
     case ADMIN_REMOVE_MEMBER:
+        
         break;
     case UNLOCK_DOOR:
         timeDelay++;
