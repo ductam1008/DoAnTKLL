@@ -25,6 +25,7 @@
 #define     MANAGE_MEMBER           21
 #define     ADMIN_ADD_MEMBER        22
 #define     ADMIN_REMOVE_MEMBER     23
+#define     CREATE_NEW_MEMBER        24
 // Noi khai bao bien toan cuc
 unsigned char arrayMapOfOutput[8] = { 0x01, 0x02, 0x04, 0x08, 0x10, 0x20, 0x40, 0x80 };
 unsigned char statusOutput[8] = { 0, 0, 0, 0, 0, 0, 0, 0 };
@@ -57,14 +58,14 @@ unsigned char arrayMapOfPassword[5][PASSWORD_LENGTH] = {
 typedef struct user_account{
     unsigned int STT;
     unsigned char password[PASSWORD_LENGTH];
-    char* name;
+    unsigned birthday;
 } user_account;
 user_account account[MAX_ACCOUNT] = {
-    {0, {1, 2, 3, 4, 5, 6}, "TAM"},
-    {1, {1, 7, 8, 9, 9, 7}, "NGH"},
-    {2, {0, 3, 3, 3, 3, 8}, "TA1"},
-    {3, {0, 8, 6, 8, 6, 9}, "TA2"},
-    {4, {0, 6, 7, 8, 9, 0}, "TA3"}
+    {0, {1, 2, 3, 4, 5, 6}, 1008},
+    {1, {1, 7, 8, 9, 9, 7}, 1009},
+    {2, {0, 3, 3, 3, 3, 8}, 1010},
+    {3, {0, 8, 6, 8, 6, 9}, 1103},
+    {4, {0, 6, 7, 8, 9, 0}, 0403}
 };
 
 unsigned char arrayPassword[PASSWORD_LENGTH];
@@ -205,8 +206,8 @@ unsigned int CheckSTT (unsigned int stt) {
 void App_PasswordDoor() {
     switch (statusPassword) {
     case INIT_SYSTEM:
-        LcdPrintStringS(0, 0, "PRESS # FOR PW");
-        LcdPrintStringS(1, 0, "");
+        LcdPrintStringS(0, 0, "PRESS C TO");
+        LcdPrintStringS(1, 0, "ENTER PW");
         LockDoor();
         if (isButtonEnter()) {
             indexOfNumber = 0;
@@ -235,12 +236,15 @@ void App_PasswordDoor() {
         if (indexOfSTT >= MAX_STT_LENGTH || isButtonEnter()) {
             reset_data();
             statusPassword = CHECK_STT;
+            
         }
         if (isButtonBack()) {
             statusPassword = INIT_SYSTEM;
+            LcdClearS();
         }
         if (timeDelay >= 600) {
             statusPassword = INIT_SYSTEM;
+            LcdClearS();
         }
         break;
     case CHECK_STT:
@@ -252,6 +256,7 @@ void App_PasswordDoor() {
         }
         else {
             statusPassword = WRONG_STT;
+            LcdClearS();
         }
         break;
     case WRONG_STT:
@@ -259,13 +264,14 @@ void App_PasswordDoor() {
         LcdPrintStringS(0,0,"WRONG STT");
         if (timeDelay>= 60) {
             statusPassword = INIT_SYSTEM;
+            LcdClearS();
         }
         break;
     case ENTER_PASSWORD:
         LcdPrintStringS(0, 0, "ENTER PW");
-        LcdPrintNumS(0,11,account[current_user].STT);
-        LcdPrintStringS(0, 12, ":");
-        LcdPrintStringS(0, 13, account[current_user].name);
+        LcdPrintNumS(0,10,account[current_user].STT);
+        LcdPrintStringS(0, 11, ":");
+        LcdPrintNumS(0, 12, account[current_user].birthday);
         timeDelay++;
         if(isButtonNumber()) {
             if (numberValue == 'D') {
@@ -283,12 +289,15 @@ void App_PasswordDoor() {
         }
         if (indexOfNumber >= PASSWORD_LENGTH){
             statusPassword = CHECK_PASSWORD;
+            LcdClearS();
         }
         if (timeDelay >=600) {
             statusPassword = INIT_SYSTEM;
+            LcdClearS();
         }
         if (isButtonBack()) {
             statusPassword = INIT_SYSTEM;
+            LcdClearS();
         }
         break;
     case CHECK_PASSWORD:
@@ -448,6 +457,62 @@ void App_PasswordDoor() {
         }
         break;
     case ADMIN_ADD_MEMBER:
+        timeDelay++;
+        LcdPrintStringS(0, 0, "PW FOR MEMBER");
+        LcdPrintNumS(0,14,index_user);
+        if (isButtonNumber())
+        {
+            if (numberValue == 'D') {
+                if (indexOfNumber > 0) {
+                    indexOfNumber--;
+                    LcdPrintStringS(1, indexOfNumber, " ");
+                }
+            }
+            else if (numberValue < 10) {
+                if (indexOfNumber < PASSWORD_LENGTH) {
+                    LcdPrintStringS(1, indexOfNumber, "*");
+                    arrayPassword[indexOfNumber] = numberValue;
+                    indexOfNumber++;
+                }
+            }
+            timeDelay = 0;
+        }
+        if (isButtonEnter() && indexOfNumber >= PASSWORD_LENGTH) {
+            statusPassword = CREATE_NEW_MEMBER;
+            reset_data();
+        }
+        if (isButtonBack()) {
+            statusPassword = MANAGE_MEMBER;
+            reset_data();
+        }
+        if (timeDelay > 600) {
+            statusPassword = ADMIN_MODE;
+            reset_data();
+        }
+        break;
+    case CREATE_NEW_MEMBER:
+        timeDelay++;
+        LcdPrintStringS(0, 0, "NEW STT: ");
+        LcdPrintStringS(1, 0, "PASSWORD: ");
+        if (timeDelay ==1) {
+            int i=0;
+            account[num_of_user].STT = index_user;
+            for (i =0; i<PASSWORD_LENGTH; i++) {
+                account[num_of_user].password[i]=arrayPassword[i];
+                LcdPrintCharS(1,10 +i, arrayPassword[i] +'0');
+            }
+            index_user++;
+            num_of_user++;
+        }
+        LcdPrintNumS(0, 9, index_user - 1);
+        if(isButtonEnter()) {
+            statusPassword = MANAGE_MEMBER;
+            reset_data();
+        }
+        if(timeDelay > 400) {
+            statusPassword = MANAGE_MEMBER;
+            reset_data();
+        }
         break;
     case ADMIN_REMOVE_MEMBER:
         break;
@@ -516,7 +581,7 @@ unsigned char isButtonPressTwo() {
 
 //press "*" to BACK
 unsigned char isButtonBack() {
-    if (key_code[12] == 1)
+    if (key_code[7] == 1)
         return 1;
     else
         return 0;
@@ -524,7 +589,7 @@ unsigned char isButtonBack() {
 
 //press "#" to OK
 unsigned char isButtonEnter() {
-    if (key_code[14] == 1)
+    if (key_code[11] == 1)
         return 1;
     else
         return 0;
