@@ -31,6 +31,7 @@
 #define     CHANGE_PW_ADMIN_AGAIN   28
 #define     CONFIRM_REMOVE          29
 #define     REMOVE_COMPLETE         30
+#define     CANT_REMOVE_ADMIN       31
 // Noi khai bao bien toan cuc
 unsigned char arrayMapOfOutput[8] = { 0x01, 0x02, 0x04, 0x08, 0x10, 0x20, 0x40, 0x80 };
 unsigned char statusOutput[8] = { 0, 0, 0, 0, 0, 0, 0, 0 };
@@ -331,6 +332,7 @@ void App_PasswordDoor() {
         }
         else {
             statusPassword = WRONG_PASSWORD;
+            reset_data();
         }
         break;   
     case USER_MODE:
@@ -339,6 +341,7 @@ void App_PasswordDoor() {
         LcdPrintStringS(1, 0, "2.CHANGE PW");
         if (isButtonBack()) {
             statusPassword=INIT_SYSTEM;
+            reset_data();
         } 
         if (isButtonPressOne()){
             statusPassword = UNLOCK_DOOR;
@@ -379,6 +382,7 @@ void App_PasswordDoor() {
         }
         if(timeDelay>600) {
             statusPassword = INIT_SYSTEM;
+            reset_data();
         }
         break;
     case ACCEPT_NEW_PW_USER:
@@ -429,6 +433,7 @@ void App_PasswordDoor() {
         LcdPrintStringS(1, 0, "2.OPTIONS");
         if (isButtonBack()) {
             statusPassword=INIT_SYSTEM;
+            reset_data();
         } 
         if (isButtonPressOne()){
             statusPassword = UNLOCK_DOOR;
@@ -445,6 +450,7 @@ void App_PasswordDoor() {
         LcdPrintStringS(1, 0, "2.MANAGE MEM");
         if (isButtonBack()) {
             statusPassword = ADMIN_MODE;
+            reset_data();
         } 
         if (isButtonPressOne()){
             statusPassword = CHANGE_PASSWORD_ADMIN;
@@ -501,6 +507,7 @@ void App_PasswordDoor() {
         }
         if(timeDelay>600) {
             statusPassword = INIT_SYSTEM;
+            reset_data();
         }
         break;
     case ACCEPT_NEW_PW_ADMIN:
@@ -591,6 +598,7 @@ void App_PasswordDoor() {
                 account[num_of_user].password[i]=arrayPassword[i];
                 LcdPrintCharS(1,10 +i, arrayPassword[i] +'0');
             }
+            account[num_of_user].name="XXX";
             index_user++;
             num_of_user++;
             
@@ -689,18 +697,35 @@ void App_PasswordDoor() {
         timeDelay++;
         LcdPrintStringS(0, 0, "REMOVE COMPLETE");
         if (timeDelay == 1) {
-            memmove(account + ad_current_member, account + ad_current_member + 1,
-                (num_of_user - ad_current_member - 1) * sizeof(user_account));
-            if (num_of_user > 0) {
-                num_of_user--;
+            if(account[ad_current_member].password[0]!=1) {
+                memmove(account + ad_current_member, account + ad_current_member + 1,
+                    (num_of_user - ad_current_member - 1) * sizeof(user_account));
+                if (num_of_user > 0) {
+                    num_of_user--;
+                }
             }
-
+            else {
+                statusPassword=CANT_REMOVE_ADMIN;
+                reset_data();
+                break;
+            }
         }
         if (timeDelay > 40) {
             reset_data();
             statusPassword = MANAGE_MEMBER;
         }
         break;
+    case CANT_REMOVE_ADMIN:
+        LcdPrintStringS(0, 0, "CANNOT REMOVE");
+        if(isButtonEnter()) {
+            statusPassword=ADMIN_OPTIONS;
+            reset_data();
+        }
+        if (timeDelay > 40) {
+            reset_data();
+            statusPassword = MANAGE_MEMBER;
+        }
+        break;   
     case UNLOCK_DOOR:
         timeDelay++;
         LcdPrintStringS(0, 0, "OPENING DOOR    ");
