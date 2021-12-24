@@ -27,6 +27,10 @@
 #define     CREATE_NEW_MEMBER       24
 #define     NEW_PW_ADMIN_INVALID    25
 #define     NEW_PW_USER_INVALID     26
+#define     CHANGE_PW_USER_AGAIN    27
+#define     CHANGE_PW_ADMIN_AGAIN   28
+#define     CONFIRM_REMOVE          29
+#define     REMOVE_COMPLETE         30
 // Noi khai bao bien toan cuc
 unsigned char arrayMapOfOutput[8] = { 0x01, 0x02, 0x04, 0x08, 0x10, 0x20, 0x40, 0x80 };
 unsigned char statusOutput[8] = { 0, 0, 0, 0, 0, 0, 0, 0 };
@@ -43,6 +47,7 @@ void Test_KeyMatrix();
 #define MAX_ACCOUNT     10
 #define ERROR_VALID     0xffff
 #define MAX_STT_LENGTH  3
+#define CHAR_ERROR_RETURN 0xf
 unsigned char arrayMapOfNumber[16] = { 1, 2, 3, 'A', 4, 5, 6, 'B',
     7, 8, 9, 'C', '*', 0, 'E', 'D' };
 unsigned char arrayMapOfPassword[5][PASSWORD_LENGTH] = {
@@ -81,6 +86,10 @@ unsigned char timeDelay = 0;
 unsigned int current_user = 0;
 unsigned int num_of_user = 5;
 unsigned int index_user = 5;
+
+unsigned char ad_num_member_list = 0;
+unsigned char ad_cur_mem_list = 0;
+unsigned char ad_current_member = 0;
 
 void App_PasswordDoor();
 unsigned char CheckPassword();
@@ -204,6 +213,9 @@ unsigned int CheckSTT (unsigned int stt) {
     }
     return ERROR_VALID;
 }
+
+
+
 void App_PasswordDoor() {
     switch (statusPassword) {
     case INIT_SYSTEM:
@@ -229,6 +241,7 @@ void App_PasswordDoor() {
                 }
             }
             else if (numberValue <10) {
+                LcdPrintStringS(1, indexOfSTT, "*");
                 STT_value = STT_value * 10 + numberValue;
                 indexOfSTT++;
             }
@@ -370,18 +383,21 @@ void App_PasswordDoor() {
         break;
     case ACCEPT_NEW_PW_USER:
         timeDelay++;
-        LcdPrintStringS(0,0, "CHANGE SUCCESS");
+        LcdPrintStringS(0,0, "CHECKING ...");
         if (timeDelay==1) {
             memmove(account[current_user].password, arrayPassword, sizeof(arrayPassword));            
         }
-        if (isButtonEnter()) {
+        if (timeDelay>50) {
             if(account[current_user].password[0]!=0) {
                 statusPassword=NEW_PW_USER_INVALID;
                 reset_data();
             }
             else {
-            statusPassword = INIT_SYSTEM;
-            reset_data();
+                LcdPrintStringS(0,0, "CHANGE SUCCESS");
+                if (isButtonEnter()) {
+                    statusPassword = INIT_SYSTEM;
+                    reset_data();
+                }
             }
         }
         break;
@@ -390,11 +406,20 @@ void App_PasswordDoor() {
         LcdPrintStringS(0,0, "NEW PW INVALID");
         LcdPrintStringS(1,0, "1ST NUM IS ERROR");
         if (isButtonEnter()) {            
-            statusPassword = USER_MODE;
+            statusPassword = CHANGE_PW_USER_AGAIN;
             reset_data();            
         }
         if (timeDelay > 600) {
-            statusPassword = USER_MODE;
+            statusPassword = CHANGE_PW_USER_AGAIN;
+            reset_data();
+        }
+        break;
+    case CHANGE_PW_USER_AGAIN:
+        timeDelay++;
+        LcdPrintStringS(0,0, "1.CHANGE AGAIN");
+        LcdPrintStringS(1,0, "1ST NUM IS 0");
+        if (isButtonPressOne()) {
+            statusPassword = CHANGE_PASSWORD_USER;
             reset_data();
         }
         break;
@@ -436,6 +461,7 @@ void App_PasswordDoor() {
         LcdPrintStringS(1, 0, "2.DELETE MEM");
         if (isButtonBack()) {
             statusPassword = ADMIN_MODE;
+            reset_data();
         } 
         if (isButtonPressOne()){
             statusPassword = ADMIN_ADD_MEMBER;
@@ -479,18 +505,21 @@ void App_PasswordDoor() {
         break;
     case ACCEPT_NEW_PW_ADMIN:
         timeDelay++;
-        LcdPrintStringS(0,0, "CHANGE SUCCESS");
+        LcdPrintStringS(0,0, "CHECKING ...");
         if (timeDelay==1) {
             memmove(account[current_user].password, arrayPassword, sizeof(arrayPassword));            
         }
-        if (isButtonEnter()) {
+        if (timeDelay>60) {
             if(account[current_user].password[0]!=1) {
                 statusPassword=NEW_PW_ADMIN_INVALID;
                 reset_data();
             }
             else {
-            statusPassword = INIT_SYSTEM;
-            reset_data();
+                LcdPrintStringS(0,0, "CHANGE SUCCESS");
+                if (isButtonEnter()) {
+                    statusPassword = INIT_SYSTEM;
+                    reset_data();
+                }
             }
         }
         break;
@@ -499,14 +528,23 @@ void App_PasswordDoor() {
         LcdPrintStringS(0,0, "NEW PW INVALID");
         LcdPrintStringS(1,0, "1ST NUM IS ERROR");
         if (isButtonEnter()) {            
-            statusPassword = ADMIN_OPTIONS;
+            statusPassword = CHANGE_PW_ADMIN_AGAIN;
             reset_data();            
         }
         if (timeDelay > 600) {
-            statusPassword = ADMIN_OPTIONS;
+            statusPassword = CHANGE_PW_ADMIN_AGAIN;
             reset_data();
         }
         break;  
+    case CHANGE_PW_ADMIN_AGAIN:
+        timeDelay++;
+        LcdPrintStringS(0,0, "1.CHANGE AGAIN");
+        LcdPrintStringS(1,0, "1ST NUM IS 1");
+        if (isButtonPressOne()) {
+            statusPassword = CHANGE_PASSWORD_ADMIN;
+            reset_data();
+        }
+        break;
     case ADMIN_ADD_MEMBER:
         timeDelay++;
         LcdPrintStringS(0, 0, "PW FOR MEMBER");
@@ -546,6 +584,7 @@ void App_PasswordDoor() {
         LcdPrintStringS(0, 0, "NEW STT: ");
         LcdPrintStringS(1, 0, "PASSWORD: ");
         if (timeDelay ==1) {
+        if (arrayPassword[0]==0 || arrayPassword[0]==1) {
             int i=0;
             account[num_of_user].STT = index_user;
             for (i =0; i<PASSWORD_LENGTH; i++) {
@@ -554,6 +593,13 @@ void App_PasswordDoor() {
             }
             index_user++;
             num_of_user++;
+            
+        }
+        else {
+            statusPassword = MANAGE_MEMBER;
+            reset_data();
+            break;
+        }
         }
         LcdPrintNumS(0, 9, index_user - 1);
         if(isButtonEnter()) {
@@ -566,7 +612,94 @@ void App_PasswordDoor() {
         }
         break;
     case ADMIN_REMOVE_MEMBER:
-        
+        timeDelay++;
+       
+        if ((ad_cur_mem_list * 2 + 0) < num_of_user) {
+            int i=0;
+            LcdPrintStringS(0, 0, "1. ");
+            LcdPrintNumS(0, 3, account[ad_cur_mem_list * 2 + 0].STT);
+            for (i =0; i<PASSWORD_LENGTH; i++) {
+                arrayPassword[i]=account[ad_cur_mem_list * 2 + 0].password[i];
+                LcdPrintCharS(1,0 +i, arrayPassword[i] +'0');
+            }
+            
+        }
+        if ((ad_cur_mem_list * 2 + 1) < num_of_user) {
+            int i=0;
+            LcdPrintStringS(0, 10, "2. ");
+            LcdPrintNumS(0, 13, account[ad_cur_mem_list * 2 + 1].STT);
+            for (i =0; i<PASSWORD_LENGTH; i++) {
+                arrayPassword[i]=account[ad_cur_mem_list * 2 + 1].password[i];               
+                LcdPrintCharS(1,10 +i, arrayPassword[i] +'0');
+            }
+            
+        }
+        if (isButtonEnter()) {
+            ad_cur_mem_list = (ad_cur_mem_list + 1) % ad_num_member_list;
+            LcdClearS();
+            timeDelay = 0;
+        }
+        if (isButtonBack()) {
+            statusPassword = MANAGE_MEMBER;
+            reset_data();
+        }
+        if (isButtonNumber()) {
+            if (numberValue == 1 && ((ad_cur_mem_list * 2 + 0) < num_of_user)) {
+                ad_current_member = ad_cur_mem_list * 2 + 0;
+            }
+            else if (numberValue == 2 && ((ad_cur_mem_list * 2 + 1) < num_of_user)) {
+                ad_current_member = ad_cur_mem_list * 2 + 1;
+            }
+            
+            else {
+                ad_current_member = CHAR_ERROR_RETURN;
+            }
+            if (ad_current_member != CHAR_ERROR_RETURN) {
+                statusPassword = CONFIRM_REMOVE;
+                reset_data();
+            }
+            timeDelay = 0;
+        }
+        if (timeDelay > 600) {
+            statusPassword = MANAGE_MEMBER;
+            reset_data();
+        }
+        break;
+    case CONFIRM_REMOVE:
+        timeDelay++;
+        LcdPrintStringS(0, 0, "REMOVE MS:");
+        LcdPrintNumS(0, 11, account[ad_current_member].STT);
+        LcdPrintCharS(0, 15, '?');
+        LcdPrintStringS(1, 0, "C:YES");
+        LcdPrintStringS(1, 8, "B:NO");
+        if (isButtonEnter()) {
+            reset_data();
+            statusPassword = REMOVE_COMPLETE;
+        }
+        if (isButtonBack()) {
+            reset_data();
+            statusPassword = ADMIN_REMOVE_MEMBER;
+        }
+        if (timeDelay > 600) {
+            reset_data();
+            statusPassword = MANAGE_MEMBER;
+        }
+        break;
+    case REMOVE_COMPLETE:
+        timeDelay++;
+        LcdPrintStringS(0, 0, "REMOVE COMPLETE");
+        if (timeDelay == 1) {
+            memmove(account + ad_current_member, account + ad_current_member + 1,
+                (num_of_user - ad_current_member - 1) * sizeof(user_account));
+            if (num_of_user > 0) {
+                num_of_user--;
+            }
+
+        }
+        if (timeDelay > 40) {
+            reset_data();
+            statusPassword = MANAGE_MEMBER;
+        }
         break;
     case UNLOCK_DOOR:
         timeDelay++;
@@ -653,6 +786,7 @@ void reset_data() {
     timeDelay = 0;
     indexOfNumber = 0;
     indexOfSTT = 0;
+    ad_cur_mem_list = 0;        //list of member
 }
 
 void UnlockDoor() {
