@@ -466,7 +466,7 @@ void App_PasswordDoor() {
         LcdPrintStringS(0, 0, "1.ADD MEM");
         LcdPrintStringS(1, 0, "2.DELETE MEM");
         if (isButtonBack()) {
-            statusPassword = ADMIN_MODE;
+            statusPassword = ADMIN_OPTIONS;
             reset_data();
         } 
         if (isButtonPressOne()){
